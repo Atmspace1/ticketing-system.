@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจองตั๋วและเลือกโต๊ะ - Table Booking System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .tables-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .booking-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .zone-section {
+            margin-bottom: 30px;
+        }
+
+        .zone-title {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .zone-title.vip {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .table-card {
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .table-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .table-card.available {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .table-card.hold {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .table-card.booked {
+            background: #fee2e2;
+            border-color: #ef4444;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .table-card.selected {
+            box-shadow: 0 0 0 4px #667eea;
+        }
+
+        .table-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .table-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .status-available {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-hold {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-booked {
+            background: #ef4444;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .selected-table-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .price-summary {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .price-total {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #10b981;
+            border-top: 2px solid #10b981;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-hold {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-confirm {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #ef4444;
+            color: white;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .no-selection {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 4em;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .team-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .team-member {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tables-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎫 ระบบจองตั๋วและเลือกโต๊ะ</h1>
+        <p>Table Booking System with OOP Principles</p>
+    </div>
+
+    <div class="main-content">
+        <div class="tables-panel">
+            <h2 style="margin-bottom: 20px;">👥 เลือกโต๊ะของคุณ</h2>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #10b981;"></div>
+                    <span>ว่าง</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #f59e0b;"></div>
+                    <span>จองชั่วคราว</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #ef4444;"></div>
+                    <span>จองแล้ว</span>
+                </div>
+            </div>
+
+            <div class="zone-section">
+                <div class="zone-title vip">🌟 โซน VIP</div>
+                <div class="tables-grid" id="zone-vip"></div>
+            </div>
+
+            <div class="zone-section">
+                <div class="zone-title">📍 โซน A</div>
+                <div class="tables-grid" id="zone-a"></div>
+            </div>
+
+            <div class="zone-section">
+                <div class="zone-title">📍 โซน B</div>
+                <div class="tables-grid" id="zone-b"></div>
+            </div>
+
+            <div class="zone-section">
+                <div class="zone-title">📍 โซน C</div>
+                <div class="tables-grid" id="zone-c"></div>
+            </div>
+        </div>
+
+        <div class="booking-panel">
+            <h2 style="margin-bottom: 20px;">ข้อมูลการจอง</h2>
+
+            <div id="booking-form">
+                <div class="no-selection">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🪑</div>
+                    <p>กรุณาเลือกโต๊ะเพื่อเริ่มการจอง</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="team-section">
+        <h2 style="text-align: center; margin-bottom: 20px;">👥 สมาชิกกลุ่ม</h2>
+        <div class="team-grid">
+            <div class="team-member">
+                <p style="font-weight: bold; margin-bottom: 5px;">นาย ถิรวุฒิ แก้วหอมคำ</p>
+                <p style="font-size: 0.9em;">1670700507</p>
+            </div>
+            <div class="team-member">
+                <p style="font-weight: bold; margin-bottom: 5px;">นาย อธิติ รุญเจริญวัฒนะ</p>
+                <p style="font-size: 0.9em;">1670701695</p>
+            </div>
+            <div class="team-member">
+                <p style="font-weight: bold; margin-bottom: 5px;">นาย วิจักษณ์ ลาวรรณ์</p>
+                <p style="font-size: 0.9em;">1670703626</p>
+            </div>
+            <div class="team-member">
+                <p style="font-weight: bold; margin-bottom: 5px;">นางสาว ชุดา เขียวหวาน</p>
+                <p style="font-size: 0.9em;">1670700218</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="success-modal" class="modal">
+    <div class="modal-content">
+        <div class="success-icon">✅</div>
+        <h2 style="color: #10b981; margin-bottom: 15px;">จองสำเร็จ!</h2>
+        <div id="success-details"></div>
+    </div>
+</div>
+
+<script>
+    // Data
+    let tables = [
+        { id: 1, number: 'T01', type: 'VIP', capacity: 4, status: 'available', basePrice: 500, zone: 'VIP' },
+        { id: 2, number: 'T02', type: 'VIP', capacity: 4, status: 'available', basePrice: 500, zone: 'VIP' },
+        { id: 3, number: 'T03', type: 'VIP', capacity: 6, status: 'booked', basePrice: 700, zone: 'VIP' },
+        { id: 4, number: 'T04', type: 'Standard', capacity: 4, status: 'available', basePrice: 300, zone: 'A' },
+        { id: 5, number: 'T05', type: 'Standard', capacity: 4, status: 'available', basePrice: 300, zone: 'A' },
+        { id: 6, number: 'T06', type: 'Standard', capacity: 4, status: 'hold', basePrice: 300, zone: 'A' },
+        { id: 7, number: 'T07', type: 'Standard', capacity: 6, status: 'available', basePrice: 400, zone: 'B' },
+        { id: 8, number: 'T08', type: 'Standard', capacity: 6, status: 'available', basePrice: 400, zone: 'B' },
+        { id: 9, number: 'T09', type: 'Standard', capacity: 8, status: 'available', basePrice: 600, zone: 'B' },
+        { id: 10, number: 'T10', type: 'Standard', capacity: 2, status: 'available', basePrice: 200, zone: 'C' },
+        { id: 11, number: 'T11', type: 'Standard', capacity: 2, status: 'available', basePrice: 200, zone: 'C' },
+        { id: 12, number: 'T12', type: 'Standard', capacity: 2, status: 'booked', basePrice: 200, zone: 'C' },
+    ];
+
+    let selectedTable = null;
+    let customerType = 'regular';
+    let numberOfGuests = 2;
+    let bookingDate = '';
+    let bookingTime = '';
+
+    // Calculate Price (Polymorphism - Strategy Pattern)
+    function calculatePrice(basePrice, type) {
+        let price = basePrice;
+        switch(type) {
+            case 'member': return Math.round(price * 0.9);
+            case 'student': return Math.round(price * 0.85);
+            case 'senior': return Math.round(price * 0.8);
+            default: return price;
+        }
+    }
+
+    // Render Tables
+    function renderTables() {
+        const zones = {
+            'VIP': document.getElementById('zone-vip'),
+            'A': document.getElementById('zone-a'),
+            'B': document.getElementById('zone-b'),
+            'C': document.getElementById('zone-c')
+        };
+
+        Object.values(zones).forEach(zone => zone.innerHTML = '');
+
+        tables.forEach(table => {
+            const card = document.createElement('div');
+            card.className = `table-card ${table.status}`;
+            if (selectedTable && selectedTable.id === table.id) {
+                card.classList.add('selected');
+            }
+
+            const statusText = {
+                'available': 'ว่าง',
+                'hold': 'จองชั่วคราว',
+                'booked': 'จองแล้ว'
+            }[table.status];
+
+            card.innerHTML = `
+                <div class="table-number">${table.number}</div>
+                <div class="table-info">
+                    <div>👥 ${table.capacity} ที่นั่ง</div>
+                    <div>💰 ${table.basePrice} บาท</div>
+                </div>
+                <span class="status-badge status-${table.status}">${statusText}</span>
+            `;
+
+            if (table.status === 'available') {
+                card.onclick = () => selectTable(table);
+            }
+
+            zones[table.zone].appendChild(card);
+        });
+    }
+
+    // Select Table (Encapsulation)
+    function selectTable(table) {
+        if (table.status !== 'available') return;
+        selectedTable = table;
+        renderTables();
+        renderBookingForm();
+    }
+
+    // Render Booking Form
+    function renderBookingForm() {
+        const form = document.getElementById('booking-form');
+
+        if (!selectedTable) {
+            form.innerHTML = `
+                <div class="no-selection">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🪑</div>
+                    <p>กรุณาเลือกโต๊ะเพื่อเริ่มการจอง</p>
+                </div>
+            `;
+            return;
+        }
+
+        const finalPrice = calculatePrice(selectedTable.basePrice, customerType);
+
+        form.innerHTML = `
+            <div class="selected-table-info">
+                <h3 style="margin-bottom: 15px;">โต๊ะที่เลือก</h3>
+                <p><strong>หมายเลข:</strong> ${selectedTable.number}</p>
+                <p><strong>ประเภท:</strong> ${selectedTable.type}</p>
+                <p><strong>โซน:</strong> ${selectedTable.zone}</p>
+                <p><strong>ที่นั่ง:</strong> ${selectedTable.capacity} ที่</p>
+                <p><strong>ราคาเริ่มต้น:</strong> ${selectedTable.basePrice} บาท</p>
+            </div>
+
+            <div class="form-group">
+                <label>ประเภทลูกค้า (Pricing Strategy)</label>
+                <select id="customer-type" onchange="updateCustomerType(this.value)">
+                    <option value="regular">ลูกค้าทั่วไป</option>
+                    <option value="member">สมาชิก (-10%)</option>
+                    <option value="student">นักเรียน/นักศึกษา (-15%)</option>
+                    <option value="senior">ผู้สูงอายุ (-20%)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>จำนวนผู้ใช้บริการ</label>
+                <input type="number" id="num-guests" min="1" max="${selectedTable.capacity}"
+                       value="${numberOfGuests}" onchange="updateGuests(this.value)">
+                <small style="color: #666; font-size: 0.9em;">สูงสุด ${selectedTable.capacity} ที่นั่ง</small>
+            </div>
+
+            <div class="form-group">
+                <label>📅 วันที่จอง</label>
+                <input type="date" id="booking-date" onchange="updateDate(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label>🕐 เวลา</label>
+                <input type="time" id="booking-time" onchange="updateTime(this.value)">
+            </div>
+
+            <div class="price-summary">
+                <h3 style="margin-bottom: 15px; color: #10b981;">สรุปราคา</h3>
+                <div class="price-row">
+                    <span>ราคาเริ่มต้น:</span>
+                    <span>${selectedTable.basePrice} บาท</span>
+                </div>
+                <div class="price-row">
+                    <span>ส่วนลด:</span>
+                    <span id="discount-text">-</span>
+                </div>
+                <div class="price-row price-total">
+                    <span>ราคารวม:</span>
+                    <span>${finalPrice} บาท</span>
+                </div>
+            </div>
+
+            ${selectedTable.status === 'available' ?
+                '<button class="btn btn-hold" onclick="holdSeat()">จองชั่วคราว (Hold)</button>' : ''}
+            ${selectedTable.status === 'hold' ?
+                '<button class="btn btn-confirm" onclick="confirmBooking()">ยืนยันการจอง (Confirm)</button>' : ''}
+            <button class="btn btn-cancel" onclick="cancelReservation()">ยกเลิก (Cancel)</button>
+        `;
+
+        updateDiscountText();
+
+        // ต้องแทรกไว้ตรงนี้! (ก่อนปีกกาปิด)
+        if(document.getElementById('customer-type')) {
+            document.getElementById('customer-type').value = customerType;
+        }
+
+    } // <--- ปีกกาปิดต้องอยู่หลังสุด
+
+    function updateDiscountText() {
+        const discountEl = document.getElementById('discount-text');
+        if (discountEl) {
+            const discounts = {
+                'regular': 'ไม่มีส่วนลด',
+                'member': '-10%',
+                'student': '-15%',
+                'senior': '-20%'
+            };
+            discountEl.textContent = discounts[customerType];
+            discountEl.style.color = customerType === 'regular' ? '#666' : '#10b981';
+        }
+    }
+
+    function updateCustomerType(value) {
+        customerType = value;
+        renderBookingForm();
+    }
+
+    function updateGuests(value) {
+        numberOfGuests = parseInt(value);
+    }
+
+    function updateDate(value) {
+        bookingDate = value;
+    }
+
+    function updateTime(value) {
+        bookingTime = value;
+    }
+
+    // Hold Seat (Encapsulation)
+    function holdSeat() {
+        if (!selectedTable || !bookingDate || !bookingTime) {
+            alert('กรุณากรอกวันที่และเวลา');
+            return;
+        }
+
+        if (numberOfGuests > selectedTable.capacity) {
+            alert(`โต๊ะนี้รองรับได้สูงสุด ${selectedTable.capacity} ที่นั่ง`);
+            return;
+        }
+
+        tables = tables.map(t =>
+            t.id === selectedTable.id ? {...t, status: 'hold'} : t
+        );
+        selectedTable.status = 'hold';
+
+        alert('จองโต๊ะชั่วคราวสำเร็จ! กรุณายืนยันภายใน 15 นาที');
+        renderTables();
+        renderBookingForm();
+    }
+
+    // Confirm Booking (Encapsulation)
+    function confirmBooking() {
+        if (!selectedTable || selectedTable.status !== 'hold') {
+            alert('กรุณาจองโต๊ะชั่วคราวก่อน');
+            return;
+        }
+
+        tables = tables.map(t =>
+            t.id === selectedTable.id ? {...t, status: 'booked'} : t
+        );
+
+        const finalPrice = calculatePrice(selectedTable.basePrice, customerType);
+
+        document.getElementById('success-details').innerHTML = `
+            <div style="background: #d1fae5; padding: 20px; border-radius: 10px; text-align: left; margin-top: 20px;">
+                <p><strong>โต๊ะ:</strong> ${selectedTable.number}</p>
+                <p><strong>วันที่:</strong> ${bookingDate}</p>
+                <p><strong>เวลา:</strong> ${bookingTime}</p>
+                <p><strong>จำนวน:</strong> ${numberOfGuests} ท่าน</p>
+                <p><strong>ราคา:</strong> ${finalPrice} บาท</p>
+            </div>
+        `;
+
+        document.getElementById('success-modal').classList.add('active');
+
+        setTimeout(() => {
+            document.getElementById('success-modal').classList.remove('active');
+            selectedTable = null;
+            bookingDate = '';
+            bookingTime = '';
+            numberOfGuests = 2;
+            customerType = 'regular';
+            renderTables();
+            renderBookingForm();
+        }, 3000);
+    }
+
+    // Cancel Reservation (Interface - IBookable)
+    function cancelReservation() {
+        if (selectedTable) {
+            tables = tables.map(t =>
+                t.id === selectedTable.id ? {...t, status: 'available'} : t
+            );
+            selectedTable = null;
+            bookingDate = '';
+            bookingTime = '';
+            renderTables();
+            renderBookingForm();
+            alert('ยกเลิกการจองสำเร็จ');
+        }
+    }
+
+    // Initialize
+    renderTables();
+</script>
+</body>
+</html>
